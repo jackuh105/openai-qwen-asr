@@ -1,6 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -16,7 +16,7 @@ from server.asr.engine import ASREngine
 from server.routes.transcriptions import router as transcriptions_router
 
 
-request_semaphore: asyncio.Semaphore = None
+request_semaphore: Optional[asyncio.Semaphore] = None
 
 
 @asynccontextmanager
