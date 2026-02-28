@@ -637,9 +637,22 @@ httpx>=0.26.0
 ## 12. 里程碑
 
 ### Phase 1: 基礎架構與非串流轉錄
-- [ ] 建立專案結構與配置
+- [x] 建立專案結構與配置
+  - [x] Create `server/` directory with subdirectories (`asr/`, `routes/`, `utils/`)
+  - [x] Create `tests/` directory
+  - [x] Create `__init__.py` files
+  - [x] Implement `server/config.py` - ServerConfig dataclass with env vars
+  - [x] Implement `server/utils/model_mapping.py` - MODEL_MAPPING dict and resolve_model()
 - [ ] 實作 ASREngine 封裝
+  - [ ] Create `server/asr/engine.py`
+  - [ ] Implement ASREngine class with Session initialization
 - [ ] 實作 Audio Transcriptions API（非串流）
+  - [ ] Create `server/models.py` - Pydantic request/response schemas
+  - [ ] Create `server/errors.py` - OpenAI-compatible error format
+  - [ ] Create `server/utils/audio.py` - Audio loading utilities
+  - [ ] Create `server/routes/transcriptions.py` - POST /v1/audio/transcriptions
+  - [ ] Create `server/app.py` - FastAPI app with lifespan
+  - [ ] Create `requirements.txt` - Dependencies
 - [ ] 支援 json, text, verbose_json 回應格式
 - [ ] 錯誤處理與 OpenAI 格式對齊
 - [ ] 單元測試
