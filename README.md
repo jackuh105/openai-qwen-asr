@@ -7,6 +7,9 @@ An OpenAI API compatible Automatic Speech Recognition (ASR) server powered by `m
 - **OpenAI API Compatible**: Drop-in replacement for OpenAI's Audio Transcriptions API
 - **Multiple Output Formats**: JSON, text, SRT, VTT, and verbose JSON
 - **SSE Streaming**: Real-time transcription updates via Server-Sent Events
+- **Realtime WebSocket API**: Bidirectional streaming for live audio transcription
+- **Concurrency Control**: Semaphore-based request limiting with configurable limits
+- **Performance Metrics**: Track latency, errors, and realtime session stats
 - **Model Flexibility**: Use `whisper-1` alias or direct Qwen model IDs
 - **Apple Silicon Optimized**: Leverages Metal GPU acceleration via MLX
 
@@ -242,7 +245,23 @@ MODEL_ID=Qwen/Qwen3-ASR-0.6B QUANTIZE_BITS=4 uv run uvicorn server.app:app --por
 
 You can also use direct Qwen model IDs like `Qwen/Qwen3-ASR-1.7B`.
 
-## Project Structure
+## Concurrency Control
+
+The server limits concurrent requests to prevent resource exhaustion. When the limit is reached, new requests receive a 503 error:
+
+```json
+{
+  "error": {
+    "message": "Server is busy. Maximum concurrent requests (4) reached.",
+    "type": "server_error",
+    "code": "server_busy"
+  }
+}
+```
+
+Configure with `MAX_CONCURRENT_REQUESTS` environment variable.
+
+## Error Handling
 
 ```
 server/
@@ -250,19 +269,26 @@ server/
 ├── config.py              # Configuration
 ├── models.py              # Pydantic schemas
 ├── errors.py              # Error handling
+├── metrics.py             # Performance metrics
+├── middleware/
+│   └── __init__.py        # Concurrency middleware
 ├── asr/
 │   ├── engine.py          # ASR engine wrapper
-│   └── streaming.py       # SSE streaming transcriber
+│   ├── streaming.py       # SSE streaming transcriber
+│   └── realtime.py        # WebSocket realtime transcriber
 ├── routes/
-│   └── transcriptions.py  # Transcriptions endpoint
+│   ├── transcriptions.py  # Transcriptions endpoint
+│   └── realtime.py        # WebSocket endpoint
 └── utils/
     ├── audio.py           # Audio utilities
     └── model_mapping.py   # Model name mapping
 tests/
 ├── test_audio.py
 ├── test_errors.py
+├── test_metrics.py
 ├── test_model_mapping.py
 ├── test_models.py
+├── test_realtime.py
 └── test_streaming.py
 ```
 
