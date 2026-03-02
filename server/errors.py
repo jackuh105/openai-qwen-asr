@@ -91,9 +91,9 @@ def transcription_failed_error(message: str = "Transcription failed") -> OpenAIE
     )
 
 
-def server_busy_error() -> OpenAIError:
+def server_busy_error(max_concurrent: int = 4) -> OpenAIError:
     return OpenAIError(
-        message="Server is busy. Maximum concurrent requests reached.",
+        message=f"Server is busy. Maximum concurrent requests ({max_concurrent}) reached.",
         error_type="server_error",
         code="server_busy",
         status_code=503,

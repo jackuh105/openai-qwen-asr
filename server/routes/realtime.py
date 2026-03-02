@@ -24,6 +24,7 @@ from server.models import (
 )
 from server.asr.realtime import RealtimeSessionState
 from server.utils.model_mapping import resolve_model
+from server.metrics import metrics
 
 
 router = APIRouter(tags=["Realtime"])
@@ -55,6 +56,7 @@ async def websocket_endpoint(websocket: WebSocket):
     session_state.start()
 
     await manager.connect(websocket, session_state.session_id)
+    metrics.record_realtime_session_start()
 
     session_created = SessionCreatedEvent(
         session=RealtimeSession(
@@ -96,9 +98,11 @@ async def websocket_endpoint(websocket: WebSocket):
 
     except WebSocketDisconnect:
         manager.disconnect(session_state.session_id)
+        metrics.record_realtime_session_end()
     except Exception as e:
         await _send_error(websocket, str(e), "server_error")
         manager.disconnect(session_state.session_id)
+        metrics.record_realtime_session_end()
 
 
 async def _handle_session_update(
@@ -151,6 +155,9 @@ async def _handle_audio_append(
         return
 
     try:
+        audio_bytes = len(event.audio) * 3 // 4
+        metrics.record_realtime_audio_bytes(audio_bytes)
+
         delta = session_state.append_audio(event.audio)
 
         if delta:
@@ -168,6 +175,7 @@ async def _handle_audio_append(
                 delta=delta,
             )
             await websocket.send_json(delta_event.model_dump())
+            metrics.record_realtime_transcription()
 
     except Exception as e:
         await _send_error(

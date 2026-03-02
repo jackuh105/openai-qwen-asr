@@ -9,21 +9,18 @@ from server.config import config
 from server.errors import (
     OpenAIError,
     openai_error_handler,
-    http_exception_handler,
     generic_exception_handler,
 )
 from server.asr.engine import ASREngine
 from server.routes.transcriptions import router as transcriptions_router
 from server.routes.realtime import router as realtime_router
-
-
-request_semaphore: Optional[asyncio.Semaphore] = None
+from server.middleware import ConcurrencyMiddleware
+from server.metrics import metrics
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    global request_semaphore
-    request_semaphore = asyncio.Semaphore(config.max_concurrent_requests)
+    app.state.semaphore = asyncio.Semaphore(config.max_concurrent_requests)
 
     print(f"Loading model: {config.model_id}")
     ASREngine.get_instance(config)
@@ -42,6 +39,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(ConcurrencyMiddleware)
+
 
 app.add_exception_handler(OpenAIError, openai_error_handler)
 app.add_exception_handler(Exception, generic_exception_handler)
@@ -54,6 +53,11 @@ app.include_router(realtime_router)
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "model_loaded": ASREngine.is_loaded()}
+
+
+@app.get("/metrics")
+async def get_metrics():
+    return metrics.get_stats()
 
 
 @app.get("/v1/models")
