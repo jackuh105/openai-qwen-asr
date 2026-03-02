@@ -669,13 +669,17 @@ httpx>=0.26.0
 - [x] 自動啟用 timestamps for srt/vtt（已在 Phase 1 完成）
 - [x] 串流測試 (54 tests passing)
 
-### Phase 3: Realtime API (WebSocket)
-- [ ] 實作 WebSocket 端點
-- [ ] 實作 session.update, session.created
-- [ ] 實作 input_audio_buffer.append/commit
-- [ ] 實作 response.audio_transcript.delta/done
-- [ ] 錯誤事件處理
-- [ ] Realtime API 測試
+### Phase 3: Realtime API (WebSocket) ✅ COMPLETE
+- [x] 實作 WebSocket 端點
+  - [x] Create `server/asr/realtime.py` - RealtimeSessionState and RealtimeTranscriber
+  - [x] Create `server/routes/realtime.py` - WebSocket endpoint at /v1/realtime
+  - [x] Add realtime event models to `server/models.py`
+  - [x] Register realtime router in `server/app.py`
+- [x] 實作 session.update, session.created
+- [x] 實作 input_audio_buffer.append/commit/clear
+- [x] 實作 response.audio_transcript.delta/done
+- [x] 錯誤事件處理
+- [x] Realtime API 測試 (21 tests, 75 total)
 
 ### Phase 4: 強化與優化
 - [ ] 併發控制與資源管理

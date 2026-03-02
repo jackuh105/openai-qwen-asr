@@ -1,6 +1,6 @@
 # Project Progress
 
-## Overall Status: Phase 2 Complete ✅
+## Overall Status: Phase 3 Complete ✅
 
 ## Phase 0: Planning ✅ COMPLETE
 - [x] Review mlx-qwen3-asr capabilities
@@ -60,13 +60,31 @@
 2. **SSE format**: `event: <type>\ndata: <json>\n\n` followed by `data: [DONE]\n\n`.
 3. **pytest-asyncio**: Requires `asyncio_mode = "auto"` in `pyproject.toml`.
 
-## Phase 3: Realtime API ⏳ NOT STARTED
-- [ ] Implement WebSocket endpoint
-- [ ] Implement session events (created, updated)
-- [ ] Implement input_audio_buffer events
-- [ ] Implement response transcript events
-- [ ] Implement error events
-- [ ] Integration tests for Realtime API
+## Phase 3: Realtime API ✅ COMPLETE
+- [x] Implement WebSocket endpoint
+  - [x] Create `server/asr/realtime.py` with RealtimeSessionState and RealtimeTranscriber
+  - [x] Create `server/routes/realtime.py` with WebSocket endpoint at `/v1/realtime`
+  - [x] Add realtime event models to `server/models.py`
+  - [x] Register realtime router in `server/app.py`
+- [x] Implement session events (created, updated)
+- [x] Implement input_audio_buffer events (append, commit, clear)
+- [x] Implement response transcript events (delta, done)
+- [x] Implement error events
+- [x] Realtime API tests (21 new tests, 75 total)
+
+### Phase 3 Detailed Progress
+| Component | Status | File |
+|-----------|--------|------|
+| Realtime session state | ✅ Done | `server/asr/realtime.py` |
+| Realtime transcriber | ✅ Done | `server/asr/realtime.py` |
+| WebSocket endpoint | ✅ Done | `server/routes/realtime.py` |
+| Realtime event models | ✅ Done | `server/models.py` |
+| Realtime tests | ✅ Done | `tests/test_realtime.py` |
+
+### Key Discoveries in Phase 3
+1. **Audio format**: Base64-encoded PCM16 at 16kHz mono
+2. **WebSocket testing**: Use `TestClient.websocket_connect()` with mock patches
+3. **Session management**: Session ID and response ID generated with UUID prefix
 
 ## Phase 4: Optimization ⏳ NOT STARTED
 - [ ] Implement concurrency control
@@ -88,7 +106,7 @@
 | Phase 0: Planning | Complete | 100% |
 | Phase 1: Core | Complete | 100% |
 | Phase 2: Streaming | Complete | 100% |
-| Phase 3: Realtime | Not Started | 0% |
+| Phase 3: Realtime | Complete | 100% |
 | Phase 4: Optimization | Not Started | 0% |
 | Phase 5: Deployment | Not Started | 0% |
 
