@@ -1,9 +1,10 @@
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, AsyncIterator
 from fastapi import APIRouter, File, Form, UploadFile, HTTPException
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import PlainTextResponse, JSONResponse, StreamingResponse
 
 from server.config import config
 from server.models import TranscriptionResponse, VerboseJsonResponse, ResponseFormat
+from server.models import TranscriptPartialEvent, TranscriptFinalEvent
 from server.errors import (
     OpenAIError,
     invalid_file_error,
@@ -18,6 +19,7 @@ from server.utils.audio import (
     segments_to_vtt,
 )
 from server.asr.engine import ASREngine
+from server.asr.streaming import StreamingTranscriber
 
 if TYPE_CHECKING:
     from mlx_qwen3_asr import TranscriptionResult
@@ -60,6 +62,7 @@ async def transcribe_audio(
     response_format: ResponseFormat = Form(default="json"),
     temperature: Optional[float] = Form(default=None),
     prompt: Optional[str] = Form(default=None),
+    stream: bool = Form(default=False),
 ):
     validate_file(file)
 
@@ -76,6 +79,17 @@ async def transcribe_audio(
     try:
         audio, sample_rate = load_audio_from_bytes(file_bytes)
         duration = get_audio_duration(audio, sample_rate)
+
+        if stream:
+            return StreamingResponse(
+                _generate_sse_stream(audio, language, response_format),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "X-Accel-Buffering": "no",
+                },
+            )
 
         result = ASREngine.transcribe(
             audio, language=language, return_timestamps=return_timestamps
@@ -125,3 +139,22 @@ async def transcribe_audio(
         raise
     except Exception as e:
         raise transcription_failed_error(str(e))
+
+
+async def _generate_sse_stream(
+    audio, language: Optional[str], response_format: ResponseFormat
+) -> AsyncIterator[str]:
+    transcriber = StreamingTranscriber(config)
+
+    async for event_type, text in transcriber.transcribe_stream_with_deltas(
+        audio, language=language
+    ):
+        if event_type == "partial":
+            event = TranscriptPartialEvent(text=text)
+        else:
+            event = TranscriptFinalEvent(text=text)
+
+        yield f"event: {event.type}\n"
+        yield f"data: {event.model_dump_json()}\n\n"
+
+    yield "data: [DONE]\n\n"

@@ -30,3 +30,13 @@ class TranscriptionRequest(BaseModel):
     language: Optional[str] = None
     response_format: ResponseFormat = Field(default="json")
     stream: bool = Field(default=False)
+
+
+class TranscriptPartialEvent(BaseModel):
+    type: str = "transcript.partial"
+    text: str
+
+
+class TranscriptFinalEvent(BaseModel):
+    type: str = "transcript.final"
+    text: str
