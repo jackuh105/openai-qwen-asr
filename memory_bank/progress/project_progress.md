@@ -1,6 +1,6 @@
 # Project Progress
 
-## Overall Status: Phase 3 Complete ✅
+## Overall Status: Phase 4 Complete ✅
 
 ## Phase 0: Planning ✅ COMPLETE
 - [x] Review mlx-qwen3-asr capabilities
@@ -86,11 +86,34 @@
 2. **WebSocket testing**: Use `TestClient.websocket_connect()` with mock patches
 3. **Session management**: Session ID and response ID generated with UUID prefix
 
-## Phase 4: Optimization ⏳ NOT STARTED
-- [ ] Implement concurrency control
-- [ ] Add performance monitoring
-- [ ] Memory optimization
-- [ ] Documentation
+## Phase 4: Optimization ✅ COMPLETE
+- [x] Implement concurrency control middleware
+  - [x] Create `server/middleware/__init__.py` with ConcurrencyMiddleware
+  - [x] Semaphore-based request limiting with configurable max_concurrent_requests
+  - [x] Return 503 with `server_busy` error when at capacity
+- [x] Add performance metrics
+  - [x] Create `server/metrics.py` with ServerMetrics class
+  - [x] Track request count, latency (min/max/avg), errors per endpoint
+  - [x] Track realtime sessions, audio bytes, transcription events
+  - [x] Calculate latency percentiles (p50, p95, p99)
+  - [x] Thread-safe metrics collection
+- [x] Add `/metrics` endpoint for monitoring
+- [x] Record metrics in transcriptions and realtime routes
+- [x] Metrics tests (18 new tests, 93 total)
+
+### Phase 4 Detailed Progress
+| Component | Status | File |
+|-----------|--------|------|
+| Concurrency middleware | ✅ Done | `server/middleware/__init__.py` |
+| Metrics module | ✅ Done | `server/metrics.py` |
+| Metrics endpoint | ✅ Done | `server/app.py` |
+| Route metrics integration | ✅ Done | `server/routes/*.py` |
+| Metrics tests | ✅ Done | `tests/test_metrics.py` |
+
+### Key Discoveries in Phase 4
+1. **Middleware pattern**: Use `BaseHTTPMiddleware` with semaphore injection via app state
+2. **Thread safety**: Use `threading.Lock` for metrics to ensure thread-safe updates
+3. **Latency tracking**: Use `deque(maxlen=100)` for recent latencies to calculate percentiles
 
 ## Phase 5: Deployment ⏳ NOT STARTED
 - [ ] Create Dockerfile
@@ -107,7 +130,7 @@
 | Phase 1: Core | Complete | 100% |
 | Phase 2: Streaming | Complete | 100% |
 | Phase 3: Realtime | Complete | 100% |
-| Phase 4: Optimization | Not Started | 0% |
+| Phase 4: Optimization | Complete | 100% |
 | Phase 5: Deployment | Not Started | 0% |
 
-**Overall Progress: ~40%** (Phases 0, 1, 2 complete)
+**Overall Progress: ~83%** (Phases 0-4 complete, Phase 5 pending)

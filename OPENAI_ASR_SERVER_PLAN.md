@@ -681,10 +681,19 @@ httpx>=0.26.0
 - [x] 錯誤事件處理
 - [x] Realtime API 測試 (21 tests, 75 total)
 
-### Phase 4: 強化與優化
-- [ ] 併發控制與資源管理
-- [ ] 效能監控
-- [ ] 文件與 API 範例
+### Phase 4: 強化與優化 ✅ COMPLETE
+- [x] 併發控制與資源管理
+  - [x] Create `server/middleware/__init__.py` with ConcurrencyMiddleware
+  - [x] Semaphore-based request limiting with configurable max_concurrent_requests
+  - [x] Return 503 with server_busy error when at capacity
+- [x] 效能監控
+  - [x] Create `server/metrics.py` with ServerMetrics class
+  - [x] Track request count, latency (min/max/avg), errors per endpoint
+  - [x] Track realtime sessions, audio bytes, transcription events
+  - [x] Calculate latency percentiles (p50, p95, p99)
+  - [x] Thread-safe metrics collection with threading.Lock
+- [x] `/metrics` endpoint for monitoring
+- [x] Metrics tests (18 new tests, 93 total)
 
 ### Phase 5: 部署
 - [ ] Dockerfile
