@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from fastapi import APIRouter, File, Form, UploadFile, HTTPException
 from fastapi.responses import PlainTextResponse, JSONResponse
 
@@ -18,6 +18,9 @@ from server.utils.audio import (
     segments_to_vtt,
 )
 from server.asr.engine import ASREngine
+
+if TYPE_CHECKING:
+    from mlx_qwen3_asr import TranscriptionResult
 
 
 router = APIRouter(tags=["Audio"])
@@ -78,7 +81,7 @@ async def transcribe_audio(
             audio, language=language, return_timestamps=return_timestamps
         )
 
-        text = result.get("text", "")
+        text = result.text
 
         if response_format == "json":
             return TranscriptionResponse(text=text).model_dump()
@@ -87,21 +90,21 @@ async def transcribe_audio(
             return PlainTextResponse(content=text)
 
         elif response_format == "srt":
-            segments = result.get("segments", [])
+            segments = result.segments or []
             if not segments and text:
                 segments = [{"start": 0.0, "end": duration, "text": text}]
             srt_content = segments_to_srt(segments)
             return PlainTextResponse(content=srt_content, media_type="text/plain")
 
         elif response_format == "vtt":
-            segments = result.get("segments", [])
+            segments = result.segments or []
             if not segments and text:
                 segments = [{"start": 0.0, "end": duration, "text": text}]
             vtt_content = segments_to_vtt(segments)
             return PlainTextResponse(content=vtt_content, media_type="text/vtt")
 
         elif response_format == "verbose_json":
-            segments = result.get("segments", [])
+            segments = result.segments or []
             words = []
             for seg in segments:
                 if "words" in seg:
@@ -109,7 +112,7 @@ async def transcribe_audio(
 
             return VerboseJsonResponse(
                 task="transcribe",
-                language=result.get("language", language),
+                language=result.language or language,
                 duration=duration,
                 text=text,
                 words=words if words else None,

@@ -1,7 +1,10 @@
-from typing import Optional, Any, Dict, List
+from typing import TYPE_CHECKING, Optional, Any, Dict, List
 import numpy as np
 
 from server.config import ServerConfig
+
+if TYPE_CHECKING:
+    from mlx_qwen3_asr import TranscriptionResult
 
 
 class ASREngine:
@@ -38,7 +41,7 @@ class ASREngine:
 
         kwargs: Dict[str, Any] = {
             "model": config.model_id,
-            "dtype": config.dtype,
+            "dtype": config.get_mlx_dtype(),
         }
 
         if config.quantize_bits is not None:
@@ -57,7 +60,7 @@ class ASREngine:
         audio: np.ndarray,
         language: Optional[str] = None,
         return_timestamps: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> "TranscriptionResult":
         """
         Transcribe audio to text.
 
@@ -67,7 +70,7 @@ class ASREngine:
             return_timestamps: Whether to return word-level timestamps
 
         Returns:
-            Dict with 'text' and optionally 'segments' or 'words'
+            TranscriptionResult with text, language, segments, etc.
         """
         if cls._session is None:
             raise RuntimeError("Model not loaded. Call load_model() first.")
@@ -84,7 +87,7 @@ class ASREngine:
         file_path: str,
         language: Optional[str] = None,
         return_timestamps: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> "TranscriptionResult":
         """
         Transcribe audio file to text.
 
@@ -94,7 +97,7 @@ class ASREngine:
             return_timestamps: Whether to return word-level timestamps
 
         Returns:
-            Dict with 'text' and optionally 'segments' or 'words'
+            TranscriptionResult with text, language, segments, etc.
         """
         if cls._session is None:
             raise RuntimeError("Model not loaded. Call load_model() first.")
