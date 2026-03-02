@@ -248,9 +248,100 @@ uv run pytest tests/test_models.py
 
 - [x] Phase 1: Core Transcriptions API (non-streaming)
 - [x] Phase 2: SSE Streaming Transcriptions
-- [ ] Phase 3: Realtime WebSocket API
+- [x] Phase 3: Realtime WebSocket API
 - [ ] Phase 4: Optimization & Concurrency Control
 - [ ] Phase 5: Docker Deployment
+
+## Realtime WebSocket API
+
+Connect to `ws://localhost:8000/v1/realtime` for bidirectional real-time transcription.
+
+### Audio Format
+
+- **Format**: PCM16 (16-bit signed integer, little-endian)
+- **Sample Rate**: 16000 Hz
+- **Channels**: Mono
+- **Encoding**: Base64
+
+### Event Types
+
+**Client → Server:**
+
+| Event | Description |
+|-------|-------------|
+| `session.update` | Update session settings (model, language) |
+| `input_audio_buffer.append` | Append audio data (base64 PCM16) |
+| `input_audio_buffer.commit` | Commit buffer and trigger transcription |
+| `input_audio_buffer.clear` | Clear audio buffer |
+
+**Server → Client:**
+
+| Event | Description |
+|-------|-------------|
+| `session.created` | Session established |
+| `session.updated` | Session settings updated |
+| `input_audio_buffer.committed` | Audio buffer committed |
+| `input_audio_buffer.speech_started` | Speech detected |
+| `input_audio_buffer.speech_stopped` | Speech ended |
+| `response.created` | Response generation started |
+| `response.audio_transcript.delta` | Incremental text |
+| `response.audio_transcript.done` | Final transcript |
+| `response.done` | Response complete |
+| `error` | Error event |
+
+### Example Flow
+
+```
+Client                                Server
+  |                                     |
+  |<-------- session.created ----------|
+  |                                     |
+  |------ session.update ------------->|
+  |<-------- session.updated ----------|
+  |                                     |
+  |--- input_audio_buffer.append ----->|  (base64 PCM16)
+  |--- input_audio_buffer.append ----->|  (multiple times)
+  |--- input_audio_buffer.commit ----->|
+  |                                     |
+  |<---- response.created -------------|
+  |<---- response.audio_transcript.delta --|
+  |<---- response.audio_transcript.done ---|
+  |<---- response.done ----------------|
+```
+
+### Python Example
+
+```python
+import asyncio
+import websockets
+import json
+import base64
+
+async def realtime_transcribe():
+    async with websockets.connect("ws://localhost:8000/v1/realtime") as ws:
+        # Receive session.created
+        msg = json.loads(await ws.recv())
+        print(f"Session: {msg['session']['id']}")
+
+        # Send audio (example: generate dummy PCM16)
+        audio_data = b'\x00\x00' * 16000  # 1 second of silence
+        await ws.send(json.dumps({
+            "type": "input_audio_buffer.append",
+            "audio": base64.b64encode(audio_data).decode()
+        }))
+
+        # Commit and receive transcription
+        await ws.send(json.dumps({"type": "input_audio_buffer.commit"}))
+
+        async for msg in ws:
+            event = json.loads(msg)
+            print(f"Event: {event['type']}")
+            if event["type"] == "response.audio_transcript.done":
+                print(f"Transcript: {event['transcript']}")
+                break
+
+asyncio.run(realtime_transcribe())
+```
 
 ## License
 
