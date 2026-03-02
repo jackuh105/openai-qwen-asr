@@ -14,6 +14,7 @@ from server.errors import (
 )
 from server.asr.engine import ASREngine
 from server.routes.transcriptions import router as transcriptions_router
+from server.routes.realtime import router as realtime_router
 
 
 request_semaphore: Optional[asyncio.Semaphore] = None
@@ -47,6 +48,7 @@ app.add_exception_handler(Exception, generic_exception_handler)
 
 
 app.include_router(transcriptions_router)
+app.include_router(realtime_router)
 
 
 @app.get("/health")
