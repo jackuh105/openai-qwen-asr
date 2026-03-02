@@ -6,6 +6,7 @@ An OpenAI API compatible Automatic Speech Recognition (ASR) server powered by `m
 
 - **OpenAI API Compatible**: Drop-in replacement for OpenAI's Audio Transcriptions API
 - **Multiple Output Formats**: JSON, text, SRT, VTT, and verbose JSON
+- **SSE Streaming**: Real-time transcription updates via Server-Sent Events
 - **Model Flexibility**: Use `whisper-1` alias or direct Qwen model IDs
 - **Apple Silicon Optimized**: Leverages Metal GPU acceleration via MLX
 
@@ -88,6 +89,52 @@ curl -X POST http://localhost:8000/v1/audio/transcriptions \
   -F "language=en"
 ```
 
+### SSE Streaming Transcription
+
+Get real-time transcription updates as the audio is processed:
+
+```bash
+curl -X POST http://localhost:8000/v1/audio/transcriptions \
+  -H "Accept: text/event-stream" \
+  -F "file=@audio.mp3" \
+  -F "model=whisper-1" \
+  -F "stream=true"
+```
+
+**SSE Event Format:**
+```
+event: transcript.partial
+data: {"type":"transcript.partial","text":"Hello"}
+
+event: transcript.partial
+data: {"type":"transcript.partial","text":"Hello world"}
+
+event: transcript.final
+data: {"type":"transcript.final","text":"Hello world."}
+
+data: [DONE]
+```
+
+**Python Example with Streaming:**
+
+```python
+import httpx
+
+with httpx.stream(
+    "POST",
+    "http://localhost:8000/v1/audio/transcriptions",
+    files={"file": open("audio.mp3", "rb")},
+    data={"model": "whisper-1", "stream": "true"},
+    timeout=60.0
+) as response:
+    for line in response.iter_lines():
+        if line.startswith("data: "):
+            data = line[6:]
+            if data == "[DONE]":
+                break
+            print(data)
+```
+
 ### List Available Models
 
 ```bash
@@ -134,6 +181,8 @@ Configure the server using environment variables:
 | `HOST` | `0.0.0.0` | Bind address |
 | `PORT` | `8000` | Bind port |
 | `MAX_NEW_TOKENS` | `4096` | Max tokens to generate |
+| `CHUNK_SIZE_SEC` | `2.0` | Streaming chunk size (seconds) |
+| `MAX_CONTEXT_SEC` | `30.0` | Streaming max context (seconds) |
 
 ### Example
 
@@ -167,7 +216,8 @@ server/
 ├── models.py              # Pydantic schemas
 ├── errors.py              # Error handling
 ├── asr/
-│   └── engine.py          # ASR engine wrapper
+│   ├── engine.py          # ASR engine wrapper
+│   └── streaming.py       # SSE streaming transcriber
 ├── routes/
 │   └── transcriptions.py  # Transcriptions endpoint
 └── utils/
@@ -177,7 +227,8 @@ tests/
 ├── test_audio.py
 ├── test_errors.py
 ├── test_model_mapping.py
-└── test_models.py
+├── test_models.py
+└── test_streaming.py
 ```
 
 ## Development
@@ -196,7 +247,7 @@ uv run pytest tests/test_models.py
 ## Roadmap
 
 - [x] Phase 1: Core Transcriptions API (non-streaming)
-- [ ] Phase 2: SSE Streaming Transcriptions
+- [x] Phase 2: SSE Streaming Transcriptions
 - [ ] Phase 3: Realtime WebSocket API
 - [ ] Phase 4: Optimization & Concurrency Control
 - [ ] Phase 5: Docker Deployment
