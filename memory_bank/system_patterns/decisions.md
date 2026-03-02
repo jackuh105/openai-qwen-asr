@@ -83,3 +83,24 @@
 - Users can optimize for speed vs accuracy
 - 4-bit/8-bit provides significant speedup
 - Useful for resource-constrained environments
+
+---
+
+### ADR-009: Dtype String to mx.Dtype Conversion
+**Decision**: Implement `DTYPE_MAP` and `get_mlx_dtype()` method in config to convert string config values to proper `mx.Dtype` objects.
+
+**Rationale**:
+- `mlx_qwen3_asr.Session` expects `mx.Dtype` objects (like `mx.float16`), NOT strings like `"fp16"`
+- Passing strings causes `TypeError: astype(): incompatible function arguments`
+- Valid dtype values: `mx.float16`, `mx.bfloat16`, `mx.float32`
+- Environment variables are strings, need conversion before passing to Session
+
+---
+
+### ADR-010: TranscriptionResult Attribute Access
+**Decision**: Access `TranscriptionResult` attributes directly (e.g., `result.text`) instead of dict methods.
+
+**Rationale**:
+- `mlx_qwen3_asr.Session.transcribe()` returns a `TranscriptionResult` dataclass, not a dict
+- Has attributes: `text`, `language`, `segments`, `chunks`, `speaker_segments`
+- Dict methods like `.get()` will fail

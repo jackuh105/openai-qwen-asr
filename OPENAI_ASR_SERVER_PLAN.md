@@ -636,26 +636,27 @@ httpx>=0.26.0
 
 ## 12. 里程碑
 
-### Phase 1: 基礎架構與非串流轉錄
+### Phase 1: 基礎架構與非串流轉錄 ✅ COMPLETE
 - [x] 建立專案結構與配置
   - [x] Create `server/` directory with subdirectories (`asr/`, `routes/`, `utils/`)
   - [x] Create `tests/` directory
   - [x] Create `__init__.py` files
-  - [x] Implement `server/config.py` - ServerConfig dataclass with env vars
+  - [x] Implement `server/config.py` - ServerConfig with env vars and dtype mapping
   - [x] Implement `server/utils/model_mapping.py` - MODEL_MAPPING dict and resolve_model()
-- [ ] 實作 ASREngine 封裝
-  - [ ] Create `server/asr/engine.py`
-  - [ ] Implement ASREngine class with Session initialization
-- [ ] 實作 Audio Transcriptions API（非串流）
-  - [ ] Create `server/models.py` - Pydantic request/response schemas
-  - [ ] Create `server/errors.py` - OpenAI-compatible error format
-  - [ ] Create `server/utils/audio.py` - Audio loading utilities
-  - [ ] Create `server/routes/transcriptions.py` - POST /v1/audio/transcriptions
-  - [ ] Create `server/app.py` - FastAPI app with lifespan
-  - [ ] Create `requirements.txt` - Dependencies
-- [ ] 支援 json, text, verbose_json 回應格式
-- [ ] 錯誤處理與 OpenAI 格式對齊
-- [ ] 單元測試
+  - [x] Create `pyproject.toml` - Project config with uv
+- [x] 實作 ASREngine 封裝
+  - [x] Create `server/asr/engine.py`
+  - [x] Implement ASREngine singleton with Session initialization
+  - [x] Handle mlx dtype conversion (string -> mx.Dtype)
+- [x] 實作 Audio Transcriptions API（非串流）
+  - [x] Create `server/models.py` - Pydantic request/response schemas
+  - [x] Create `server/errors.py` - OpenAI-compatible error format
+  - [x] Create `server/utils/audio.py` - Audio loading and SRT/VTT formatting
+  - [x] Create `server/routes/transcriptions.py` - POST /v1/audio/transcriptions
+  - [x] Create `server/app.py` - FastAPI app with lifespan
+- [x] 支援 json, text, srt, vtt, verbose_json 回應格式
+- [x] 錯誤處理與 OpenAI 格式對齊
+- [x] 單元測試 (45 tests passing)
 
 ### Phase 2: SSE 串流與字幕格式
 - [ ] 實作 SSE 串流轉錄

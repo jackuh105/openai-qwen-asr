@@ -1,6 +1,6 @@
 # Project Progress
 
-## Overall Status: Phase 1 Complete (Core Implementation)
+## Overall Status: Phase 1 Complete ✅
 
 ## Phase 0: Planning ✅ COMPLETE
 - [x] Review mlx-qwen3-asr capabilities
@@ -10,13 +10,13 @@
 - [x] Set up memory bank
 
 ## Phase 1: Core Implementation ✅ COMPLETE
-- [x] Create project structure
-- [x] Implement configuration module
-- [x] Implement ASR engine wrapper
+- [x] Create project structure (`server/`, `tests/`)
+- [x] Implement configuration module with dtype mapping
+- [x] Implement ASR engine wrapper (singleton pattern)
 - [x] Implement Transcriptions API (non-streaming)
-- [x] Implement json/text/verbose_json formats
-- [x] Implement error handling
-- [ ] Unit tests for Phase 1
+- [x] Implement json/text/srt/vtt/verbose_json formats
+- [x] Implement error handling (OpenAI-compatible)
+- [x] Unit tests (45 tests passing)
 
 ### Phase 1 Detailed Progress
 | Component | Status | File |
@@ -30,14 +30,17 @@
 | Audio utilities | ✅ Done | `server/utils/audio.py` |
 | Transcriptions route | ✅ Done | `server/routes/transcriptions.py` |
 | FastAPI app | ✅ Done | `server/app.py` |
-| Requirements file | ✅ Done | `requirements.txt` |
+| Unit tests | ✅ Done | `tests/` (45 tests) |
+
+### Key Discoveries in Phase 1
+1. **mlx-qwen3-asr dtype issue**: Session expects `mx.Dtype` objects, not strings. Fixed with `DTYPE_MAP` in config.
+2. **Pydantic V2 config**: Use `model_config = ConfigDict(extra="ignore")` for ignoring extra fields.
+3. **TranscriptionResult is dataclass**: Use attribute access (`result.text`) instead of dict methods.
 
 ## Phase 2: Streaming & Subtitles ⏳ NOT STARTED
 - [ ] Implement SSE streaming transcription
-- [ ] Implement srt format output
-- [ ] Implement vtt format output
-- [ ] Auto-enable timestamps for srt/vtt
-- [ ] Integration tests for streaming
+- [ ] Streaming tests
+- [ ] Integration tests with actual ASR model
 
 ## Phase 3: Realtime API ⏳ NOT STARTED
 - [ ] Implement WebSocket endpoint
@@ -71,4 +74,4 @@
 | Phase 4: Optimization | Not Started | 0% |
 | Phase 5: Deployment | Not Started | 0% |
 
-**Overall Progress: ~40%** (Phase 0 and Phase 1 complete, Phase 1 tests pending)
+**Overall Progress: ~33%** (Phase 0 and Phase 1 complete)

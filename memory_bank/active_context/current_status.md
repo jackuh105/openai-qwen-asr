@@ -1,21 +1,21 @@
 # Current Project Status
 
-## Status: Phase 1 Complete, Ready for Phase 2
+## Status: Phase 1 Complete ✅, Ready for Phase 2
 
-## Session: 2026-02-28
+## Session: 2026-03-02
 
-### Completed This Session
+### Completed (Phase 1)
 - [x] Created project directory structure (`server/`, `tests/`, `server/asr/`, `server/routes/`, `server/utils/`)
-- [x] Implemented `server/config.py` - Server configuration with environment variables
+- [x] Implemented `server/config.py` - Server configuration with environment variables and dtype mapping
 - [x] Implemented `server/utils/model_mapping.py` - OpenAI model name to Qwen ID mapping
-- [x] Created memory-bank skill for persistent documentation
-- [x] Implemented `requirements.txt` - Project dependencies
+- [x] Implemented `pyproject.toml` - Project config with uv
 - [x] Implemented `server/models.py` - Pydantic request/response schemas
 - [x] Implemented `server/errors.py` - OpenAI-compatible error format
-- [x] Implemented `server/utils/audio.py` - Audio loading and format conversion utilities
+- [x] Implemented `server/utils/audio.py` - Audio loading, SRT/VTT formatting
 - [x] Implemented `server/asr/engine.py` - ASR engine wrapper (singleton pattern)
 - [x] Implemented `server/routes/transcriptions.py` - POST /v1/audio/transcriptions endpoint
 - [x] Implemented `server/app.py` - FastAPI entry point with model preloading
+- [x] Unit tests - 45 tests passing
 
 ### Files Created
 ```
@@ -36,14 +36,24 @@ server/
     ├── audio.py             ✅ DONE
     └── model_mapping.py     ✅ DONE
 tests/
-└── __init__.py
-requirements.txt             ✅ DONE
+├── __init__.py
+├── test_audio.py            ✅ DONE
+├── test_errors.py           ✅ DONE
+├── test_model_mapping.py    ✅ DONE
+└── test_models.py           ✅ DONE
+pyproject.toml               ✅ DONE
 ```
 
+### Key Discoveries
+1. **mlx-qwen3-asr dtype issue**: `Session` expects `mx.Dtype` objects (like `mx.float16`), NOT strings. Fixed with `DTYPE_MAP` in config.
+2. **Pydantic V2 config**: Use `model_config = ConfigDict(extra="ignore")` for ignoring extra fields.
+3. **TranscriptionResult is dataclass**: Use attribute access (`result.text`) instead of dict methods.
+
 ### Next Steps
-1. Write unit tests for Phase 1 components
-2. Start Phase 2: SSE streaming transcription
-3. Add srt/vtt format support (basic implementation done, needs refinement)
+1. Phase 2: SSE streaming for transcriptions
+2. Phase 3: Realtime WebSocket API
+3. Integration tests with actual ASR model
+4. Docker deployment
 
 ## Design Decisions Confirmed
 
@@ -59,3 +69,4 @@ requirements.txt             ✅ DONE
 | Authentication | None |
 | Quantization | Configurable via env var |
 | ASR Engine | Singleton pattern with lazy loading |
+| Dtype handling | `DTYPE_MAP` converts string config to `mx.Dtype` |
