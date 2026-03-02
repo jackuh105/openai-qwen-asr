@@ -658,11 +658,16 @@ httpx>=0.26.0
 - [x] 錯誤處理與 OpenAI 格式對齊
 - [x] 單元測試 (45 tests passing)
 
-### Phase 2: SSE 串流與字幕格式
-- [ ] 實作 SSE 串流轉錄
-- [ ] 支援 srt, vtt 回應格式
-- [ ] 自動啟用 timestamps for srt/vtt
-- [ ] 串流測試
+### Phase 2: SSE 串流與字幕格式 ✅ COMPLETE
+- [x] 實作 SSE 串流轉錄
+  - [x] Create `server/asr/streaming.py` - StreamingTranscriber class
+  - [x] Implement `transcribe_stream()` and `transcribe_stream_with_deltas()` async generators
+  - [x] Add SSE event models to `server/models.py` - TranscriptPartialEvent, TranscriptFinalEvent
+  - [x] Update `server/routes/transcriptions.py` with `stream` parameter
+  - [x] Implement SSE StreamingResponse with proper headers
+- [x] 支援 srt, vtt 回應格式（已在 Phase 1 完成）
+- [x] 自動啟用 timestamps for srt/vtt（已在 Phase 1 完成）
+- [x] 串流測試 (54 tests passing)
 
 ### Phase 3: Realtime API (WebSocket)
 - [ ] 實作 WebSocket 端點

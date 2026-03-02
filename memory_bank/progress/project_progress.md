@@ -1,6 +1,6 @@
 # Project Progress
 
-## Overall Status: Phase 1 Complete ✅
+## Overall Status: Phase 2 Complete ✅
 
 ## Phase 0: Planning ✅ COMPLETE
 - [x] Review mlx-qwen3-asr capabilities
@@ -37,10 +37,28 @@
 2. **Pydantic V2 config**: Use `model_config = ConfigDict(extra="ignore")` for ignoring extra fields.
 3. **TranscriptionResult is dataclass**: Use attribute access (`result.text`) instead of dict methods.
 
-## Phase 2: Streaming & Subtitles ⏳ NOT STARTED
-- [ ] Implement SSE streaming transcription
-- [ ] Streaming tests
-- [ ] Integration tests with actual ASR model
+## Phase 2: SSE Streaming ✅ COMPLETE
+- [x] Implement SSE streaming transcription
+  - [x] Create `server/asr/streaming.py` with StreamingTranscriber class
+  - [x] Implement `transcribe_stream()` and `transcribe_stream_with_deltas()` async generators
+  - [x] Add SSE event models (TranscriptPartialEvent, TranscriptFinalEvent)
+  - [x] Update transcriptions route with `stream` parameter
+  - [x] Implement SSE StreamingResponse
+- [x] Streaming tests (9 new tests, 54 total)
+- [x] Add pytest-asyncio dependency
+
+### Phase 2 Detailed Progress
+| Component | Status | File |
+|-----------|--------|------|
+| Streaming transcriber | ✅ Done | `server/asr/streaming.py` |
+| SSE event models | ✅ Done | `server/models.py` |
+| Stream parameter | ✅ Done | `server/routes/transcriptions.py` |
+| Streaming tests | ✅ Done | `tests/test_streaming.py` |
+
+### Key Discoveries in Phase 2
+1. **Streaming API**: `_ModelHolder.get(model_id, dtype=dtype)` returns `(model_obj, None)`.
+2. **SSE format**: `event: <type>\ndata: <json>\n\n` followed by `data: [DONE]\n\n`.
+3. **pytest-asyncio**: Requires `asyncio_mode = "auto"` in `pyproject.toml`.
 
 ## Phase 3: Realtime API ⏳ NOT STARTED
 - [ ] Implement WebSocket endpoint
@@ -69,9 +87,9 @@
 |-------|--------|------------|
 | Phase 0: Planning | Complete | 100% |
 | Phase 1: Core | Complete | 100% |
-| Phase 2: Streaming | Not Started | 0% |
+| Phase 2: Streaming | Complete | 100% |
 | Phase 3: Realtime | Not Started | 0% |
 | Phase 4: Optimization | Not Started | 0% |
 | Phase 5: Deployment | Not Started | 0% |
 
-**Overall Progress: ~33%** (Phase 0 and Phase 1 complete)
+**Overall Progress: ~40%** (Phases 0, 1, 2 complete)
