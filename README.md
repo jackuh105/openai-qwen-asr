@@ -147,6 +147,41 @@ curl http://localhost:8000/v1/models
 curl http://localhost:8000/health
 ```
 
+### Metrics
+
+Get server performance metrics:
+
+```bash
+curl http://localhost:8000/metrics
+```
+
+**Response:**
+```json
+{
+  "uptime_seconds": 3600.0,
+  "requests": {
+    "/v1/audio/transcriptions": {
+      "count": 100,
+      "avg_time_ms": 250.5,
+      "min_time_ms": 100.0,
+      "max_time_ms": 500.0,
+      "errors": 2
+    }
+  },
+  "realtime": {
+    "active_sessions": 2,
+    "total_sessions": 10,
+    "audio_bytes_received": 1024000,
+    "transcription_events": 50
+  },
+  "latency_percentiles": {
+    "p50_ms": 200.0,
+    "p95_ms": 450.0,
+    "p99_ms": 480.0
+  }
+}
+```
+
 ## OpenAI Python SDK
 
 ```python
@@ -249,7 +284,7 @@ uv run pytest tests/test_models.py
 - [x] Phase 1: Core Transcriptions API (non-streaming)
 - [x] Phase 2: SSE Streaming Transcriptions
 - [x] Phase 3: Realtime WebSocket API
-- [ ] Phase 4: Optimization & Concurrency Control
+- [x] Phase 4: Optimization & Concurrency Control
 - [ ] Phase 5: Docker Deployment
 
 ## Realtime WebSocket API
