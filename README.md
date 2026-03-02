@@ -343,6 +343,33 @@ async def realtime_transcribe():
 asyncio.run(realtime_transcribe())
 ```
 
+### Test Client
+
+A test client script is provided for testing the realtime API with audio files:
+
+```bash
+# Terminal 1: Start the server
+uv run uvicorn server.app:app --host 0.0.0.0 --port 8000
+
+# Terminal 2: Run the realtime client
+uv run python test_realtime_client.py --file audio.mp3 --host localhost --port 8000
+```
+
+**Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--file, -f` | (required) | Path to audio file |
+| `--host` | `localhost` | Server host |
+| `--port` | `8000` | Server port |
+| `--chunk-size` | `1.0` | Chunk size in seconds |
+
+**What it does:**
+1. Connects to the WebSocket endpoint at `/v1/realtime`
+2. Loads and resamples audio to 16kHz mono
+3. Sends audio chunks as base64-encoded PCM16
+4. Prints all events including text deltas and final transcript
+
 ## License
 
 MIT
